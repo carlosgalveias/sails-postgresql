@@ -33,7 +33,6 @@ describe('adapter', function() {
     // Insert a record
     it('should insert a single record', function(done) {
       adapter.create('test', 'test_create', attributes, function(err, result) {
-
         // Check record was actually inserted
         support.Client(function(err, client, close) {
           client.query('SELECT * FROM "test_create"', function(err, result) {

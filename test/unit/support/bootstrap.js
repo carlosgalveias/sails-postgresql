@@ -3,8 +3,16 @@
  */
 
 var pg = require('pg'),
-    _ = require('lodash'),
-    adapter = require('../../../lib/adapter');
+  _ = require('lodash'),
+  adapter = require('../../../lib/adapter');
+pg.defaults.poolSize = 1
+let myPool = null;
+
+const initPool = function(config) {
+  if (myPool) {return myPool;}
+  myPool = new pg.Pool(config);
+  return myPool;
+}
 
 var Support = module.exports = {};
 
@@ -23,7 +31,8 @@ Support.Config = {
   user: process.env.POSTGRES_ENV_POSTGRES_USER || process.env.WATERLINE_ADAPTER_TESTS_USER || 'sails',
   password: process.env.POSTGRES_ENV_POSTGRES_PASSWORD || process.env.WATERLINE_ADAPTER_TESTS_PASSWORD || 'sails',
   database: process.env.POSTGRES_ENV_POSTGRES_DB || process.env.WATERLINE_ADAPTER_TESTS_DATABASE || 'sailspg',
-  port: process.env.POSTGRES_PORT_5432_TCP_PORT || process.env.WATERLINE_ADAPTER_TESTS_PORT || 5432
+  port: process.env.POSTGRES_PORT_5432_TCP_PORT || process.env.WATERLINE_ADAPTER_TESTS_PORT || 5432,
+  poolSize: 1
 };
 
 // Fixture Collection Def
@@ -72,9 +81,9 @@ Support.Setup = function(tableName, cb) {
   connection.identity = 'test';
 
   adapter.registerConnection(connection, collections, function(err) {
-    if(err) return cb(err);
+    if (err) return cb(err);
     adapter.define('test', tableName, Support.Definition, function(err) {
-      if(err) return cb(err);
+      if (err) return cb(err);
       cb();
     });
   });
@@ -97,9 +106,10 @@ Support.registerConnection = function(tableNames, cb) {
 
 // Remove a table
 Support.Teardown = function(tableName, cb) {
-  pg.connect(Support.Config, function(err, client, done) {
+  const pool = initPool(Support.Config);
+  pool.connect(function(err, client, done) {
     dropTable(tableName, client, function(err) {
-      if(err) {
+      if (err) {
         done();
         return cb(err);
       }
@@ -115,14 +125,16 @@ Support.Teardown = function(tableName, cb) {
 
 // Return a client used for testing
 Support.Client = function(cb) {
-  pg.connect(Support.Config, cb);
+  const pool = initPool(Support.Config);
+  pool.connect(cb);
 };
 
 // Seed a record to use for testing
 Support.Seed = function(tableName, cb) {
-  pg.connect(Support.Config, function(err, client, done) {
+  const pool = initPool(Support.Config);
+  pool.connect(function(err, client, done) {
     createRecord(tableName, client, function(err) {
-      if(err) {
+      if (err) {
         done();
         return cb(err);
       }
@@ -144,8 +156,8 @@ function createRecord(table, client, cb) {
   table = '"' + table + '"';
 
   var query = [
-  "INSERT INTO " + table + ' (field_1, field_2)',
-  "values ('foo', 'bar');"
+    "INSERT INTO " + table + ' (field_1, field_2)',
+    "values ('foo', 'bar');"
   ].join('');
 
   client.query(query, cb);
