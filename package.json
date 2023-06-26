@@ -20,7 +20,7 @@
     "pg": "^8.9.0",
     "waterline-cursor": "https://github.com/carlosgalveias/waterline-cursor.git#v0.0.8",
     "waterline-errors": "0.10.1",
-    "waterline-sequel": "https://github.com/carlosgalveias/waterline-sequel.git#0.7.0"
+    "waterline-sequel": "https://github.com/carlosgalveias/waterline-sequel.git#0.5.8"
   },
   "scripts": {
   },
