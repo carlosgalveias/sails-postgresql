@@ -15,7 +15,7 @@
     "url": "git://github.com/balderdashy/sails-postgresql.git"
   },
   "dependencies": {
-    "async": "^3.2.4",
+    "async": "^1.5.2",
     "lodash": "^4.17.21",
     "pg": "^8.9.0",
     "waterline-cursor": "https://github.com/carlosgalveias/waterline-cursor.git#v0.0.8",
